@@ -10,10 +10,10 @@ import (
 )
 
 type InstallArchiveOptions struct {
-	URLs           []string
-	Filename       string
+	ProvideURLs    func() (urls []string, err error)
 	Name           string
-	StripDirectory bool
+	File           string
+	DirectoryLevel int
 }
 
 // InstallArchive installs an archive to a directory
@@ -54,7 +54,7 @@ func InstallArchive(ctx context.Context, opts InstallArchiveOptions) (dir string
 	}
 	defer os.RemoveAll(dirTemp)
 
-	file := filepath.Join(base, opts.Filename)
+	file := filepath.Join(base, opts.File)
 
 	// ensure file exists
 	{
@@ -70,15 +70,26 @@ func InstallArchive(ctx context.Context, opts InstallArchiveOptions) (dir string
 			}
 			err = nil
 
-			log.Println("downloading:", opts.Filename)
+			log.Println("downloading:", opts.File)
 
-			if err = AdvancedFetchFile(ctx, opts.URLs, file); err != nil {
+			var urls []string
+			if opts.ProvideURLs != nil {
+				urls, err = opts.ProvideURLs()
+				if err != nil {
+					return
+				}
+			} else {
+				err = errors.New("no urls provided")
+				return
+			}
+
+			if err = AdvancedFetchFile(ctx, urls, file); err != nil {
 				return
 			}
 		}
 	}
 
-	log.Println("extracting:", opts.Filename)
+	log.Println("extracting:", opts.File)
 
 	// extract file
 	{
@@ -95,24 +106,28 @@ func InstallArchive(ctx context.Context, opts InstallArchiveOptions) (dir string
 		_ = f.Close()
 	}
 
-	dirInstall := dirTemp
+	dirSrc := dirTemp
 
-	if opts.StripDirectory {
-		var dirs []os.DirEntry
-		if dirs, err = os.ReadDir(dirTemp); err != nil {
-			return
-		}
-		for _, dir := range dirs {
-			if dir.IsDir() {
-				dirInstall = filepath.Join(dirTemp, dir.Name())
-				break
+	if opts.DirectoryLevel > 0 {
+	outerLoop:
+		for i := 0; i < opts.DirectoryLevel; i++ {
+			var dirs []os.DirEntry
+			if dirs, err = os.ReadDir(dirSrc); err != nil {
+				return
 			}
+			for _, dir := range dirs {
+				if dir.IsDir() {
+					dirSrc = filepath.Join(dirSrc, dir.Name())
+					continue outerLoop
+				}
+			}
+			err = errors.New("no directory found in " + dirSrc)
+			return
 		}
 	}
 
 	os.RemoveAll(dir)
-
-	if err = os.Rename(dirInstall, dir); err != nil {
+	if err = os.Rename(dirSrc, dir); err != nil {
 		return
 	}
 

@@ -4,15 +4,12 @@ import (
 	"context"
 	"fmt"
 	"github.com/guoyk93/activate-toolchain"
-	"github.com/guoyk93/rg"
-)
-
-const (
-	indexURL = "https://nodejs.org/download/release/index.json"
 )
 
 var (
-	downloadURLs = []string{
+	indexURL = "https://nodejs.org/download/release/index.json"
+
+	baseURLs = []string{
 		"https://mirrors.cloud.tencent.com/nodejs-release",
 		"https://mirrors.aliyun.com/nodejs-release",
 		"https://nodejs.org/download/release",
@@ -25,17 +22,15 @@ type VersionItem struct {
 	Files   []string `json:"files"`
 }
 
-func createFilenameSuffix(os string, arch string) string {
-	if arch == "amd64" {
-		arch = "x64"
+func remapArch(arch string) string {
+	if v := map[string]string{
+		"amd64": "x64",
+		"386":   "x86",
+		"arm":   "armv7l",
+	}[arch]; v != "" {
+		return v
 	}
-	if arch == "386" {
-		arch = "x86"
-	}
-	if arch == "arm" {
-		arch = "armv7l"
-	}
-	return "-" + os + "-" + arch + ".tar.gz"
+	return arch
 }
 
 type toolchain struct {
@@ -43,7 +38,9 @@ type toolchain struct {
 
 func (t *toolchain) resolveVersion(ctx context.Context, targetVersion string) (version string, err error) {
 	var data []VersionItem
-	rg.Must0(activate_toolchain.FetchJSON(ctx, indexURL, &data))
+	if err = activate_toolchain.FetchJSON(ctx, indexURL, &data); err != nil {
+		return
+	}
 
 	var (
 		versions     []string
@@ -67,43 +64,34 @@ func (t *toolchain) resolveVersion(ctx context.Context, targetVersion string) (v
 	return
 }
 
-func (t *toolchain) resolveFilename(version, os, arch string) (rel string) {
-	return "node-" + version + createFilenameSuffix(os, arch)
-}
-
 func (t *toolchain) Name() string {
 	return "node"
 }
 
 func (t *toolchain) Activate(ctx context.Context, targetVersion, os, arch string) (script string, err error) {
-	defer rg.Guard(&err)
-
-	version := rg.Must(t.resolveVersion(ctx, targetVersion))
-	filename := t.resolveFilename(version, os, arch)
-
-	var urls []string
-	for _, url := range downloadURLs {
-		urls = append(urls, url+"/"+version+"/"+filename)
-	}
-
 	var dir string
+
 	if dir, err = activate_toolchain.InstallArchive(ctx, activate_toolchain.InstallArchiveOptions{
-		URLs:           urls,
-		Filename:       filename,
+		ProvideURLs: func() (urls []string, err error) {
+			var version string
+			if version, err = t.resolveVersion(ctx, targetVersion); err != nil {
+				return
+			}
+
+			for _, url := range baseURLs {
+				urls = append(urls, fmt.Sprintf("%s/%s/node-%s-%s-%s.tar.gz", url, version, version, os, remapArch(arch)))
+			}
+
+			return
+		},
 		Name:           "node-" + targetVersion,
-		StripDirectory: true,
+		File:           "node-" + targetVersion + ".tar.gz",
+		DirectoryLevel: 1,
 	}); err != nil {
 		return
 	}
 
-	script = fmt.Sprintf(
-		`
-export PATH="%s/bin:$PATH";
-echo "node %s activated";
-`,
-		dir,
-		version,
-	)
+	script = fmt.Sprintf(`export PATH="%s/bin:$PATH";`, dir)
 
 	return
 }
