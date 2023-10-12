@@ -43,6 +43,16 @@ func TryFetch(ctx context.Context, url string) (delay time.Duration, err error) 
 
 // DetectFastestURL detects the fastest url from urls
 func DetectFastestURL(ctx context.Context, urls []string) (fastest string, err error) {
+	if len(urls) == 0 {
+		err = errors.New("no urls provided")
+		return
+	}
+
+	if len(urls) == 1 {
+		fastest = urls[0]
+		return
+	}
+
 	var (
 		delays  = map[string]time.Duration{}
 		delaysL = &sync.Mutex{}
@@ -113,11 +123,6 @@ func FetchFile(ctx context.Context, url string, localFile string) (err error) {
 
 // AdvancedFetchFile detect fastest url from candidate urls and fetch file to local path
 func AdvancedFetchFile(ctx context.Context, urls []string, localFile string) (err error) {
-	if len(urls) == 0 {
-		err = errors.New("no urls provided")
-		return
-	}
-
 	var fastest string
 	if fastest, err = DetectFastestURL(ctx, urls); err != nil {
 		return

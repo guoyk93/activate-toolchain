@@ -49,57 +49,46 @@ func (t *toolchain) Name() string {
 }
 
 func (t *toolchain) Activate(ctx context.Context, targetVersion, os, arch string) (script string, err error) {
-	var dir string
-
-	var subPath string
-
+	var dirPath string
 	if os == "darwin" {
-		subPath = filepath.Join("Contents", "Home")
+		dirPath = filepath.Join("Contents", "Home")
 	}
 
-	if dir, err = activate_toolchain.InstallArchive(ctx, activate_toolchain.InstallArchiveOptions{
+	var version *semver.Version
+	if version, err = semver.NewVersion(targetVersion); err != nil {
+		return
+	}
+
+	usePrimary := true
+
+	opts := activate_toolchain.InstallArchiveOptions{
 		ProvideURLs: func() (urls []string, err error) {
-			var version *semver.Version
-			if version, err = semver.NewVersion(targetVersion); err != nil {
-				return
-			}
-
 			for _, src := range sources {
-				if !src.Primary() {
+				if src.Primary() != usePrimary {
 					continue
 				}
 				if u, e := src.Resolve(ctx, version, os, arch); e == nil {
 					urls = append(urls, u)
 				} else {
-					log.Println("failed to resolve primary source:", src.Name(), ":", e)
+					log.Println("failed to resolve source:", src.Name(), ":", e)
 				}
 			}
-
-			if len(urls) > 0 {
-				return
-			}
-
-			log.Println("fallback to secondary sources")
-
-			for _, src := range sources {
-				if src.Primary() {
-					continue
-				}
-				if u, e := src.Resolve(ctx, version, os, arch); e == nil {
-					urls = append(urls, u)
-				} else {
-					log.Println("failed to resolve secondary source:", src.Name(), ":", e)
-				}
-			}
-
 			return
 		},
 		Name:           "jdk-" + targetVersion,
 		File:           "jdk-" + targetVersion + ".tar.gz",
 		DirectoryLevel: 1,
-		DirectoryPath:  subPath,
-	}); err != nil {
-		return
+		DirectoryPath:  dirPath,
+	}
+
+	var dir string
+
+	if dir, err = activate_toolchain.InstallArchive(ctx, opts); err != nil {
+		log.Println("trying to use secondary sources")
+		usePrimary = false
+		if dir, err = activate_toolchain.InstallArchive(ctx, opts); err != nil {
+			return
+		}
 	}
 
 	script = fmt.Sprintf(`
