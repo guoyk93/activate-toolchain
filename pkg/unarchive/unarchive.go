@@ -319,6 +319,22 @@ func untarFile(hdr *tar.Header, tr *tar.Reader, fp, rootdir string) error {
 		return err
 	}
 
+	if hdr.Typeflag == tar.TypeSymlink {
+		if err := os.Symlink(hdr.Linkname, fp); err != nil {
+			return err
+		}
+
+		if err := os.Chmod(fp, os.FileMode(hdr.Mode)); err != nil {
+			log.Printf("warn: failed setting file permissions for %q: %#v", fp, err)
+		}
+
+		if err := os.Chtimes(fp, time.Now(), hdr.ModTime); err != nil {
+			log.Printf("warn: failed setting file atime and mtime for %q: %#v", fp, err)
+		}
+
+		return nil
+	}
+
 	file, err := os.Create(fp)
 	if err != nil {
 		return err
