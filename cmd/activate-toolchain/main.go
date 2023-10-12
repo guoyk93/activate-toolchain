@@ -9,6 +9,7 @@ import (
 	"runtime"
 	"strings"
 
+	_ "github.com/guoyk93/activate-toolchain/toolchains/jdk"
 	_ "github.com/guoyk93/activate-toolchain/toolchains/node"
 )
 

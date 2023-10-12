@@ -6,9 +6,11 @@ import (
 	"github.com/guoyk93/activate-toolchain"
 )
 
-var (
+const (
 	indexURL = "https://nodejs.org/download/release/index.json"
+)
 
+var (
 	baseURLs = []string{
 		"https://mirrors.cloud.tencent.com/nodejs-release",
 		"https://mirrors.aliyun.com/nodejs-release",
@@ -91,7 +93,9 @@ func (t *toolchain) Activate(ctx context.Context, targetVersion, os, arch string
 		return
 	}
 
-	script = fmt.Sprintf(`export PATH="%s/bin:$PATH";`, dir)
+	script = fmt.Sprintf(`
+export PATH="%s/bin:$PATH";
+`, dir)
 
 	return
 }

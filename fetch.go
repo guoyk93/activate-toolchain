@@ -43,6 +43,16 @@ func TryFetch(ctx context.Context, url string) (delay time.Duration, err error) 
 
 // DetectFastestURL detects the fastest url from urls
 func DetectFastestURL(ctx context.Context, urls []string) (fastest string, err error) {
+	if len(urls) == 0 {
+		err = errors.New("no urls provided")
+		return
+	}
+
+	if len(urls) == 1 {
+		fastest = urls[0]
+		return
+	}
+
 	var (
 		delays  = map[string]time.Duration{}
 		delaysL = &sync.Mutex{}
@@ -157,8 +167,8 @@ func FetchJSON(ctx context.Context, url string, v interface{}) (err error) {
 	return
 }
 
-// FetchAndFindHTML fetches html from url, and find elements by selector, and call fn for each element
-func FetchAndFindHTML(ctx context.Context, url string, sel string, fn func(i int, s *goquery.Selection)) (err error) {
+// FetchQueryHTML fetches html from url, and find elements by selector, and call fn for each element
+func FetchQueryHTML(ctx context.Context, url string, sel string, fn func(i int, s *goquery.Selection)) (err error) {
 	var req *http.Request
 	if req, err = http.NewRequestWithContext(ctx, http.MethodGet, url, nil); err != nil {
 		return
