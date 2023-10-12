@@ -2,12 +2,14 @@ package jdk
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"github.com/Masterminds/semver/v3"
 	"github.com/PuerkitoBio/goquery"
 	"github.com/guoyk93/activate-toolchain"
 	"log"
 	"net/url"
+	"strconv"
 )
 
 type sourceUSTC struct {
@@ -22,6 +24,11 @@ func (u sourceUSTC) Primary() bool {
 }
 
 func (u sourceUSTC) Resolve(ctx context.Context, version *semver.Version, os, arch string) (out string, err error) {
+	if version.Original() != strconv.Itoa(int(version.Major())) {
+		err = errors.New("only support major version")
+		return
+	}
+
 	baseURL := fmt.Sprintf(
 		"https://mirrors.ustc.edu.cn/adoptium/releases/temurin%d-binaries/LatestRelease/",
 		version.Major(),
