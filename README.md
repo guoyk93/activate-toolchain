@@ -29,9 +29,13 @@ eval "$(activate-toolchain node@16.2 jdk@17 maven@3.8)"
 ## Supported Toolchains and Version Formats
 
 * `node`
-  * `node@18`
-  * `node@18.18`
-  * `node@18.18.1`
+    * `node@18`
+    * `node@18.18`
+    * `node@18.18.1`
+* `jdk`
+    * `jdk@8`
+    * `jdk@8.0.372`
+    * `jdk@8.0.372+7`
 
 ## Credits
 

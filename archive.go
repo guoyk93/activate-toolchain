@@ -14,6 +14,7 @@ type InstallArchiveOptions struct {
 	Name           string
 	File           string
 	DirectoryLevel int
+	DirectoryPath  string
 }
 
 // InstallArchive installs an archive to a directory
@@ -124,6 +125,10 @@ func InstallArchive(ctx context.Context, opts InstallArchiveOptions) (dir string
 			err = errors.New("no directory found in " + dirSrc)
 			return
 		}
+	}
+
+	if opts.DirectoryPath != "" {
+		dirSrc = filepath.Join(dirSrc, opts.DirectoryPath)
 	}
 
 	os.RemoveAll(dir)

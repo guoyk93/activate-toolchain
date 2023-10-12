@@ -113,6 +113,11 @@ func FetchFile(ctx context.Context, url string, localFile string) (err error) {
 
 // AdvancedFetchFile detect fastest url from candidate urls and fetch file to local path
 func AdvancedFetchFile(ctx context.Context, urls []string, localFile string) (err error) {
+	if len(urls) == 0 {
+		err = errors.New("no urls provided")
+		return
+	}
+
 	var fastest string
 	if fastest, err = DetectFastestURL(ctx, urls); err != nil {
 		return
@@ -157,8 +162,8 @@ func FetchJSON(ctx context.Context, url string, v interface{}) (err error) {
 	return
 }
 
-// FetchAndFindHTML fetches html from url, and find elements by selector, and call fn for each element
-func FetchAndFindHTML(ctx context.Context, url string, sel string, fn func(i int, s *goquery.Selection)) (err error) {
+// FetchQueryHTML fetches html from url, and find elements by selector, and call fn for each element
+func FetchQueryHTML(ctx context.Context, url string, sel string, fn func(i int, s *goquery.Selection)) (err error) {
 	var req *http.Request
 	if req, err = http.NewRequestWithContext(ctx, http.MethodGet, url, nil); err != nil {
 		return
