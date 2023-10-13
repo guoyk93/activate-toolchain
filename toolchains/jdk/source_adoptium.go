@@ -8,7 +8,6 @@ import (
 	"github.com/go-resty/resty/v2"
 	"github.com/guoyk93/activate-toolchain"
 	"log"
-	"net/http"
 	"net/url"
 	"strconv"
 )
@@ -148,20 +147,6 @@ func (u sourceAdoptium) ResolveDownloadURL(ctx context.Context, spec activate_to
 		os,
 		arch,
 	)
-
-	// resolves first redirection if any
-	{
-		var res *resty.Response
-		if res, err = client.R().SetContext(ctx).Get(downloadURL); err != nil {
-			return
-		}
-		switch res.StatusCode() {
-		case http.StatusPermanentRedirect, http.StatusTemporaryRedirect, http.StatusFound:
-			if loc := res.Header().Get("Location"); loc != "" {
-				downloadURL = loc
-			}
-		}
-	}
 
 	return
 }
