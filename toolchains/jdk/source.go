@@ -2,16 +2,20 @@ package jdk
 
 import (
 	"context"
-	"github.com/Masterminds/semver/v3"
+	"github.com/guoyk93/activate-toolchain"
 	"sync"
 )
 
+// Source is a source of JDK
 type Source interface {
+	// Name returns the name of the source
 	Name() string
 
+	// Primary returns if the source is primary
 	Primary() bool
 
-	Resolve(ctx context.Context, version *semver.Version, os, arch string) (out string, err error)
+	// ResolveDownloadURL resolves the JDK download url
+	ResolveDownloadURL(ctx context.Context, spec activate_toolchain.Spec) (downloadURL string, err error)
 }
 
 var (

@@ -4,7 +4,6 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"github.com/Masterminds/semver/v3"
 	"github.com/PuerkitoBio/goquery"
 	"github.com/guoyk93/activate-toolchain"
 	"log"
@@ -23,15 +22,15 @@ func (u sourceUSTC) Primary() bool {
 	return false
 }
 
-func (u sourceUSTC) Resolve(ctx context.Context, version *semver.Version, os, arch string) (out string, err error) {
-	if version.Original() != strconv.Itoa(int(version.Major())) {
-		err = errors.New("only support major version")
+func (u sourceUSTC) ResolveDownloadURL(ctx context.Context, spec activate_toolchain.Spec) (out string, err error) {
+	if spec.Version.Original() != strconv.Itoa(int(spec.Version.Major())) {
+		err = errors.New("sourceUSTC: only support major version")
 		return
 	}
 
 	baseURL := fmt.Sprintf(
 		"https://mirrors.ustc.edu.cn/adoptium/releases/temurin%d-binaries/LatestRelease/",
-		version.Major(),
+		spec.Version.Major(),
 	)
 
 	if err = activate_toolchain.FetchQueryHTML(
@@ -41,7 +40,7 @@ func (u sourceUSTC) Resolve(ctx context.Context, version *semver.Version, os, ar
 		func(i int, s *goquery.Selection) {
 			href, _ := s.Attr("href")
 
-			if !validateAdoptiumFilename(href, os, arch) {
+			if !validateAdoptiumFilename(href, spec) {
 				return
 			}
 

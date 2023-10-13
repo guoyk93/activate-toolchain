@@ -23,7 +23,9 @@ func (u sourceAdoptium) Primary() bool {
 	return true
 }
 
-func (u sourceAdoptium) Resolve(ctx context.Context, version *semver.Version, os, arch string) (out string, err error) {
+func (u sourceAdoptium) ResolveDownloadURL(ctx context.Context, spec activate_toolchain.Spec) (downloadURL string, err error) {
+	os, arch := convertPlatform(spec)
+
 	client := resty.New()
 
 	type ReleaseVersion struct {
@@ -39,25 +41,26 @@ func (u sourceAdoptium) Resolve(ctx context.Context, version *semver.Version, os
 		Releases []string `json:"releases"`
 	}
 
-	// key is 'semver'
-	releaseVersions := map[string]ReleaseVersion{}
-
-	// fetch all release versions
+	// find the best release version
+	var bestReleaseVersion ReleaseVersion
 	{
+		var items []ReleaseVersion
+
 		var (
 			page     int
 			pageSize = 20
 		)
+
 		for {
 			var (
 				res  *resty.Response
 				data ResponseReleaseVersions
 			)
-			if res, err = client.R().SetQueryParams(map[string]string{
-				"architecture": remapArch(arch),
+			if res, err = client.R().SetContext(ctx).SetQueryParams(map[string]string{
+				"architecture": arch,
 				"heap_size":    "normal",
 				"image_type":   "jdk",
-				"os":           remapOS(os),
+				"os":           os,
 				"page":         strconv.Itoa(page),
 				"page_size":    strconv.Itoa(pageSize),
 				"project":      "jdk",
@@ -66,7 +69,7 @@ func (u sourceAdoptium) Resolve(ctx context.Context, version *semver.Version, os
 				"sort_order":   "DESC",
 				"vendor":       "eclipse",
 				"jvm_impl":     "hotspot",
-				"version":      fmt.Sprintf("[%d, %d)", version.Major(), version.Major()+1),
+				"version":      fmt.Sprintf("[%d, %d)", spec.Version.Major(), spec.Version.Major()+1),
 			}).SetResult(&data).Get("https://api.adoptium.net/v3/info/release_versions"); err != nil {
 				return
 			}
@@ -76,7 +79,7 @@ func (u sourceAdoptium) Resolve(ctx context.Context, version *semver.Version, os
 			}
 
 			for _, item := range data.Versions {
-				releaseVersions[item.Semver] = item
+				items = append(items, item)
 			}
 
 			if len(data.Versions) < pageSize {
@@ -85,19 +88,13 @@ func (u sourceAdoptium) Resolve(ctx context.Context, version *semver.Version, os
 
 			page++
 		}
-	}
 
-	var bestSemver string
-
-	// calculate the best semver
-	{
-		var semvers []string
-
-		for sv := range releaseVersions {
-			semvers = append(semvers, sv)
-		}
-
-		if bestSemver, err = activate_toolchain.ResolveVersion(semvers, version.Original()); err != nil {
+		if bestReleaseVersion, err = activate_toolchain.FindBestVersionedItem(
+			spec.VersionConstraints,
+			items,
+			func(v ReleaseVersion) (version *semver.Version, err error) {
+				return semver.NewVersion(v.Semver)
+			}); err != nil {
 			return
 		}
 	}
@@ -111,11 +108,11 @@ func (u sourceAdoptium) Resolve(ctx context.Context, version *semver.Version, os
 			res  *resty.Response
 			data ResponseReleaseNames
 		)
-		if res, err = client.R().SetQueryParams(map[string]string{
-			"architecture": remapArch(arch),
+		if res, err = client.R().SetContext(ctx).SetQueryParams(map[string]string{
+			"architecture": arch,
 			"heap_size":    "normal",
 			"image_type":   "jdk",
-			"os":           remapOS(os),
+			"os":           os,
 			"page":         "0",
 			"page_size":    "20",
 			"project":      "jdk",
@@ -125,7 +122,7 @@ func (u sourceAdoptium) Resolve(ctx context.Context, version *semver.Version, os
 			"vendor":       "eclipse",
 			"jvm_impl":     "hotspot",
 			"semver":       "true",
-			"version":      bestSemver,
+			"version":      bestReleaseVersion.Semver,
 		}).SetResult(&data).Get("https://api.adoptium.net/v3/info/release_names"); err != nil {
 			return
 		}
@@ -144,11 +141,11 @@ func (u sourceAdoptium) Resolve(ctx context.Context, version *semver.Version, os
 
 	log.Println("found matched release:", releaseName)
 
-	out = fmt.Sprintf(
+	downloadURL = fmt.Sprintf(
 		"https://api.adoptium.net/v3/binary/version/%s/%s/%s/jdk/hotspot/normal/eclipse?project=jdk",
 		url.PathEscape(releaseName),
-		remapOS(os),
-		remapArch(arch),
+		os,
+		arch,
 	)
 
 	return

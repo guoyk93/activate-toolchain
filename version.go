@@ -6,33 +6,51 @@ import (
 	"sort"
 )
 
-// ResolveVersion resolves the best match version from a list of versions.
-func ResolveVersion(versions []string, target string) (result string, err error) {
-	var c *semver.Constraints
-	if c, err = semver.NewConstraint("~" + target); err != nil {
+// FindBestVersionedItem finds the best match version item from a list of items.
+func FindBestVersionedItem[T any](c *semver.Constraints, items []T, fn func(v T) (version *semver.Version, err error)) (matched T, err error) {
+	var versions semver.Collection
+
+	for _, item := range items {
+		var version *semver.Version
+		if version, err = fn(item); err != nil {
+			return
+		}
+		versions = append(versions, version)
+	}
+
+	var idx int
+	if idx, _, err = FindBestVersion(c, versions); err != nil {
 		return
 	}
 
-	var svs semver.Collection
+	matched = items[idx]
+	return
+}
 
-	for _, version := range versions {
-		var v *semver.Version
-		if v, err = semver.NewVersion(version); err != nil {
-			err = nil
-			continue
-		}
+// FindBestVersion finds the best match version from a list of versions.
+func FindBestVersion(c *semver.Constraints, versions semver.Collection) (idx int, version *semver.Version, err error) {
+	var matched semver.Collection
+	for _, v := range versions {
 		if c.Check(v) {
-			svs = append(svs, v)
+			matched = append(matched, v)
 		}
 	}
 
-	sort.Sort(sort.Reverse(svs))
+	sort.Sort(sort.Reverse(matched))
 
-	if len(svs) == 0 {
-		err = errors.New("no matching version for " + target)
+	if len(matched) == 0 {
+		err = errors.New("no matching version")
 		return
 	}
 
-	result = svs[0].Original()
+	version = matched[0]
+
+	for i, v := range versions {
+		if v.Equal(version) {
+			idx = i
+			return
+		}
+	}
+
 	return
 }

@@ -6,7 +6,6 @@ import (
 	"github.com/guoyk93/activate-toolchain"
 	"log"
 	"os"
-	"runtime"
 	"strings"
 
 	_ "github.com/guoyk93/activate-toolchain/toolchains/jdk"
@@ -29,24 +28,19 @@ func main() {
 
 argLoop:
 	for _, arg := range os.Args[1:] {
-		splits := strings.Split(arg, "@")
-		if len(splits) != 2 {
-			err = errors.New("invalid argument: " + arg + ", must be 'NAME@VERSION'")
-			return
-		}
-		name := strings.TrimSpace(splits[0])
-		version := strings.TrimSpace(splits[1])
+		var spec activate_toolchain.Spec
 
-		if strings.HasPrefix(version, "v") {
-			version = version[1:]
+		if spec, err = activate_toolchain.ParseSpec(arg); err != nil {
+			return
 		}
 
 		for _, toolchain := range activate_toolchain.Toolchains {
-			if toolchain.Name() != name {
+			if !toolchain.Support(spec) {
 				continue
 			}
+
 			var script string
-			if script, err = toolchain.Activate(ctx, version, runtime.GOOS, runtime.GOARCH); err != nil {
+			if script, err = toolchain.Activate(ctx, spec); err != nil {
 				return
 			}
 
@@ -55,7 +49,7 @@ argLoop:
 			continue argLoop
 		}
 
-		err = errors.New("toolchain not supported: " + name)
+		err = errors.New("no supported toolchain: " + arg)
 		return
 	}
 
