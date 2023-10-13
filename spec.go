@@ -2,6 +2,7 @@ package activate_toolchain
 
 import (
 	"errors"
+	"fmt"
 	"github.com/Masterminds/semver/v3"
 	"runtime"
 	"strings"
@@ -14,7 +15,7 @@ type Spec struct {
 	Name string
 	// VersionRaw is the original version string, without any prefixing 'v'.
 	VersionRaw string
-	// Version is the version requested, original is preserved to generate versioned name
+	// Version is the version requested
 	Version *semver.Version
 	// VersionConstraints is the version constraints with tide.
 	VersionConstraints *semver.Constraints
@@ -24,6 +25,19 @@ type Spec struct {
 	// Arch is the target architecture.
 	// follows go convention, see https://go.dev/doc/install/source#environment for values.
 	Arch string
+}
+
+// VersionHasMinor returns whether the version has minor.
+func (s Spec) VersionHasMinor() bool {
+	return s.Version.Minor() > 0 ||
+		s.Version.Patch() > 0 ||
+		strings.HasPrefix(s.VersionRaw, fmt.Sprintf("%d.", s.Version.Major()))
+}
+
+// VersionHasPatch returns whether the version has patch.
+func (s Spec) VersionHasPatch() bool {
+	return s.Version.Patch() > 0 ||
+		strings.HasPrefix(s.VersionRaw, fmt.Sprintf("%d.%d.", s.Version.Major(), s.Version.Minor()))
 }
 
 func (s Spec) VersionedName() string {

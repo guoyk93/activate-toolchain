@@ -86,5 +86,5 @@ export PATH="$JAVA_HOME/bin:$PATH";
 }
 
 func init() {
-	activate_toolchain.Toolchains = append(activate_toolchain.Toolchains, &toolchain{})
+	activate_toolchain.AddToolchain(&toolchain{})
 }

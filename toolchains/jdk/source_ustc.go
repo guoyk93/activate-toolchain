@@ -8,7 +8,6 @@ import (
 	"github.com/guoyk93/activate-toolchain"
 	"log"
 	"net/url"
-	"strconv"
 )
 
 type sourceUSTC struct {
@@ -23,7 +22,7 @@ func (u sourceUSTC) Primary() bool {
 }
 
 func (u sourceUSTC) ResolveDownloadURL(ctx context.Context, spec activate_toolchain.Spec) (out string, err error) {
-	if spec.Version.Original() != strconv.Itoa(int(spec.Version.Major())) {
+	if spec.VersionHasMinor() {
 		err = errors.New("sourceUSTC: only support major version")
 		return
 	}
