@@ -32,12 +32,19 @@ func TryFetch(ctx context.Context, url string) (delay time.Duration, err error) 
 	}
 	defer res.Body.Close()
 
-	delay = time.Since(start)
-
 	if res.StatusCode != http.StatusOK {
 		err = fmt.Errorf("bad status code: %d while fetching %s", res.StatusCode, url)
 		return
 	}
+
+	// try read first 4k
+	lr := io.LimitReader(res.Body, 4096)
+	if _, err = io.Copy(io.Discard, lr); err != nil {
+		return
+	}
+
+	delay = time.Since(start)
+
 	return
 }
 
