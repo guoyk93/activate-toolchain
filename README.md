@@ -26,20 +26,37 @@ Only support shell in `POSIX` environment.
 eval "$(activate-toolchain node@16.2 jdk@17 maven@3.8)"
 ```
 
-## Supported Toolchains and Version Formats
+Or create a `toolchains.txt` file with each line a toolchain, and run
+
+```shell
+eval "$(activate-toolchain)"
+```
+
+## Supported Toolchains and Version Examples
 
 * `node`
-    * `node@18`
-    * `node@18.18`
-    * `node@18.18.1`
+
+  ```
+  node@18
+  node@18.18
+  node@18.18.1
+  ```
+
 * `jdk`
-    * `jdk@8`
-    * `jdk@8.0.372`
-    * `jdk@8.0.372+7`
+
+  ```
+  jdk@8
+  jdk@8.0
+  jdk@8.0.372
+  ```
+
 * `maven`
-    * `maven@3`
-    * `maven@3.8`
-    * `maven@3.8.1`
+
+  ```
+  maven@3
+  maven@3.8
+  maven@3.8.1
+  ```
 
 ## Credits
 

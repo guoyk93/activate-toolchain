@@ -1,6 +1,7 @@
 package main
 
 import (
+	"bytes"
 	"context"
 	"errors"
 	"github.com/guoyk93/activate-toolchain"
@@ -25,9 +26,23 @@ func main() {
 
 	ctx := context.Background()
 
+	args := os.Args[1:]
+
+	// support toolchains.txt
+	{
+		buf, _ := os.ReadFile("toolchains.txt")
+		for _, line := range bytes.Split(buf, []byte("\n")) {
+			line = bytes.TrimSpace(line)
+			if len(line) == 0 {
+				continue
+			}
+			args = append(args, string(line))
+		}
+	}
+
 	var scripts []string
 
-	for _, arg := range os.Args[1:] {
+	for _, arg := range args {
 		var spec activate_toolchain.Spec
 
 		if spec, err = activate_toolchain.ParseSpec(arg); err != nil {
