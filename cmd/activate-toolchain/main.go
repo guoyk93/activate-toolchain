@@ -9,6 +9,7 @@ import (
 	"strings"
 
 	_ "github.com/guoyk93/activate-toolchain/toolchains/jdk"
+	_ "github.com/guoyk93/activate-toolchain/toolchains/maven"
 	_ "github.com/guoyk93/activate-toolchain/toolchains/node"
 )
 
@@ -26,7 +27,6 @@ func main() {
 
 	var scripts []string
 
-argLoop:
 	for _, arg := range os.Args[1:] {
 		var spec activate_toolchain.Spec
 
@@ -34,23 +34,19 @@ argLoop:
 			return
 		}
 
-		for _, toolchain := range activate_toolchain.Toolchains {
-			if !toolchain.Support(spec) {
-				continue
-			}
+		toolchain, ok := activate_toolchain.FindToolchain(spec)
 
-			var script string
-			if script, err = toolchain.Activate(ctx, spec); err != nil {
-				return
-			}
-
-			scripts = append(scripts, script)
-
-			continue argLoop
+		if !ok {
+			err = errors.New("no supported toolchain: " + arg)
+			return
 		}
 
-		err = errors.New("no supported toolchain: " + arg)
-		return
+		var script string
+		if script, err = toolchain.Activate(ctx, spec); err != nil {
+			return
+		}
+
+		scripts = append(scripts, script)
 	}
 
 	if _, err = os.Stdout.WriteString(strings.Join(scripts, "\n\n")); err != nil {
