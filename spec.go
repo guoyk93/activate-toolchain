@@ -27,6 +27,21 @@ type Spec struct {
 	Arch string
 }
 
+// ConvertPlatform converts the platform strings to the target platform.
+func (s Spec) ConvertPlatform(remapOS, remapArch map[string]string) (os, arch string) {
+	if remapOS != nil {
+		if os = remapOS[s.OS]; os == "" {
+			os = s.OS
+		}
+	}
+	if remapArch != nil {
+		if arch = remapArch[s.Arch]; arch == "" {
+			arch = s.Arch
+		}
+	}
+	return
+}
+
 // VersionHasMinor returns whether the version has minor.
 func (s Spec) VersionHasMinor() bool {
 	return s.Version.Minor() > 0 ||

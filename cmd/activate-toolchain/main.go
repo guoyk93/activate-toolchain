@@ -12,6 +12,7 @@ import (
 	_ "github.com/guoyk93/activate-toolchain/toolchains/jdk"
 	_ "github.com/guoyk93/activate-toolchain/toolchains/maven"
 	_ "github.com/guoyk93/activate-toolchain/toolchains/node"
+	_ "github.com/guoyk93/activate-toolchain/toolchains/ossutil"
 )
 
 func main() {
