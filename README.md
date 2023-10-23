@@ -58,6 +58,12 @@ eval "$(activate-toolchain)"
   maven@3.8.1
   ```
 
+* `ossutil`
+
+  ```
+  ossutil@1
+  ```
+
 ## Credits
 
 GUO YANKE, MIT License
