@@ -1,3 +1,5 @@
-node@18
 jdk@21
+node@18
 maven@3.8
+ossutil@1
+pnpm@8

@@ -6,6 +6,7 @@ import (
 	"github.com/Masterminds/semver/v3"
 	"github.com/PuerkitoBio/goquery"
 	"github.com/guoyk93/activate-toolchain"
+	"github.com/guoyk93/activate-toolchain/pkg/ezscript"
 	"log"
 	"regexp"
 	"strings"
@@ -120,9 +121,12 @@ func (t toolchain) Activate(ctx context.Context, spec activate_toolchain.Spec) (
 		return
 	}
 
-	script = fmt.Sprintf(`export PATH="%s/bin:$PATH";`, dir)
-
-	return
+	return ezscript.Render(
+		map[string]any{
+			"dir": dir,
+		},
+		`{{addEnv "PATH" (filepathJoin .dir "bin")}}`,
+	)
 }
 
 func init() {

@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"github.com/guoyk93/activate-toolchain"
+	"github.com/guoyk93/activate-toolchain/pkg/ezscript"
 	"log"
 	"path/filepath"
 	"strings"
@@ -77,12 +78,12 @@ func (t *toolchain) Activate(ctx context.Context, spec activate_toolchain.Spec) 
 		}
 	}
 
-	script = fmt.Sprintf(`
-export JAVA_HOME="%s";
-export PATH="$JAVA_HOME/bin:$PATH";
-`, dir)
-
-	return
+	return ezscript.Render(map[string]any{
+		"dir": dir,
+	},
+		`{{setEnv "JAVA_HOME" .dir}}`,
+		`{{addEnv "PATH" (filepathJoin .dir "bin")}}`,
+	)
 }
 
 func init() {
