@@ -17,22 +17,14 @@ var (
 		"https://mirrors.aliyun.com/nodejs-release",
 		"https://nodejs.org/download/release",
 	}
-)
 
-func convertPlatform(spec activate_toolchain.Spec) (os string, arch string) {
-	os, arch = spec.OS, spec.Arch
-
-	switch arch {
-	case "amd64":
-		arch = "x64"
-	case "386":
-		arch = "x86"
-	case "arm":
-		arch = "armv7l"
+	remapOS   = map[string]string{}
+	remapArch = map[string]string{
+		"amd64": "x64",
+		"386":   "x86",
+		"arm":   "armv7l",
 	}
-
-	return
-}
+)
 
 type VersionItem struct {
 	Version string   `json:"version"`
@@ -78,7 +70,7 @@ func (t *toolchain) Support(spec activate_toolchain.Spec) bool {
 }
 
 func (t *toolchain) Activate(ctx context.Context, spec activate_toolchain.Spec) (script string, err error) {
-	os, arch := convertPlatform(spec)
+	os, arch := spec.ConvertPlatform(remapOS, remapArch)
 
 	var dir string
 
