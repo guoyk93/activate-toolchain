@@ -34,35 +34,13 @@ eval "$(activate-toolchain)"
 
 ## Supported Toolchains and Version Examples
 
-* `node`
-
-  ```
-  node@18
-  node@18.18
-  node@18.18.1
-  ```
-
-* `jdk`
-
-  ```
-  jdk@8
-  jdk@8.0
-  jdk@8.0.372
-  ```
-
-* `maven`
-
-  ```
-  maven@3
-  maven@3.8
-  maven@3.8.1
-  ```
-
-* `ossutil`
-
-  ```
-  ossutil@1
-  ```
+| Toolchain | Version Examples                      |
+|-----------|---------------------------------------|
+| node      | `node@16`, `node@16.2`, `node@16.2.0` |
+| jdk       | `jdk@8`, `jdk@8.0`, `jdk@8.0.372`     |
+| maven     | `maven@3`, `maven@3.8`, `maven@3.8.1` |
+| ossutil   | `ossutil@1`                           |
+| pnpm      | `pnpm@8`, `pnpm@8.9`, `pnpm@8.9.2`    |
 
 ## Credits
 

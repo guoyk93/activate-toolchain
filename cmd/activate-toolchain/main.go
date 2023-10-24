@@ -13,6 +13,7 @@ import (
 	_ "github.com/guoyk93/activate-toolchain/toolchains/maven"
 	_ "github.com/guoyk93/activate-toolchain/toolchains/node"
 	_ "github.com/guoyk93/activate-toolchain/toolchains/ossutil"
+	_ "github.com/guoyk93/activate-toolchain/toolchains/pnpm"
 )
 
 func main() {
