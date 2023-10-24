@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"context"
 	"errors"
+	"fmt"
 	"github.com/guoyk93/activate-toolchain"
 	"log"
 	"os"
@@ -63,7 +64,9 @@ func main() {
 			return
 		}
 
-		scripts = append(scripts, script)
+		head := fmt.Sprintf("# activate %s\n", arg)
+
+		scripts = append(scripts, head+script)
 	}
 
 	if _, err = os.Stdout.WriteString(strings.Join(scripts, "\n\n")); err != nil {

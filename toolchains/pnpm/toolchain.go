@@ -6,7 +6,7 @@ import (
 	"github.com/Masterminds/semver/v3"
 	"github.com/go-resty/resty/v2"
 	"github.com/guoyk93/activate-toolchain"
-	"github.com/guoyk93/activate-toolchain/pkg/gotmpl"
+	"github.com/guoyk93/activate-toolchain/pkg/ezscript"
 	"os"
 	"path/filepath"
 )
@@ -107,26 +107,33 @@ func (t *toolchain) Activate(ctx context.Context, spec activate_toolchain.Spec) 
 		return
 	}
 
-	var home string
-	if home, err = os.UserHomeDir(); err != nil {
+	// make it executable
+	exe := filepath.Join(dir, "package", "pnpm")
+
+	if err = os.Chmod(exe, 0755); err != nil {
 		return
 	}
 
-	if script, err = gotmpl.Render(
+	// create bin dir and create a symlink
+	dirBin := filepath.Join(dir, "bin")
+
+	if err = os.MkdirAll(dirBin, 0755); err != nil {
+		return
+	}
+
+	os.RemoveAll(filepath.Join(dirBin, "pnpm"))
+
+	if err = os.Symlink(filepath.Join("..", "package", "pnpm"), filepath.Join(dirBin, "pnpm")); err != nil {
+		return
+	}
+
+	return ezscript.Render(
 		map[string]any{
-			"cmd":       filepath.Join(dir, "package", "pnpm"),
-			"pnpm_home": filepath.Join(home, ".pnpm"),
+			"dir_bin": dirBin,
 		},
-		`chmod +x "{{.cmd}}"`,
-		`mkdir -p "{{.pnpm_home}}"`,
-		`ln -sf "{{.cmd}}" "{{.pnpm_home}}/pnpm"`,
-		`export PATH="{{.pnpm_home}}:$PATH"`,
-		`export PNPM_HOME="{{.pnpm_home}}"`,
-	); err != nil {
-		return
-	}
-
-	return
+		`{{setEnv "PNPM_HOME" (filepathJoin "$HOME" ".pnpm")}}`,
+		`{{addEnv "PATH" "$PNPM_HOME" .dir_bin}}`,
+	)
 }
 
 func init() {
