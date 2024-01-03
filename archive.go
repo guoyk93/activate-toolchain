@@ -3,10 +3,11 @@ package activate_toolchain
 import (
 	"context"
 	"errors"
-	"github.com/guoyk93/activate-toolchain/pkg/unarchive"
 	"log"
 	"os"
 	"path/filepath"
+
+	"github.com/yankeguo/activate-toolchain/pkg/unarchive"
 )
 
 type InstallArchiveOptions struct {

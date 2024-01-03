@@ -1,4 +1,4 @@
-module github.com/guoyk93/activate-toolchain
+module github.com/yankeguo/activate-toolchain
 
 go 1.21.1
 
@@ -6,7 +6,7 @@ require (
 	github.com/Masterminds/semver/v3 v3.2.1
 	github.com/PuerkitoBio/goquery v1.8.1
 	github.com/dsnet/compress v0.0.1
-	github.com/go-resty/resty/v2 v2.10.0
+	github.com/go-resty/resty/v2 v2.11.0
 	github.com/klauspost/pgzip v1.2.6
 	github.com/pkg/errors v0.9.1
 	github.com/stretchr/testify v1.8.4

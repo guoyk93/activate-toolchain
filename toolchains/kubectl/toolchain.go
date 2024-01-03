@@ -4,9 +4,9 @@ import (
 	"context"
 	"fmt"
 	"github.com/Masterminds/semver/v3"
-	"github.com/guoyk93/activate-toolchain"
-	"github.com/guoyk93/activate-toolchain/pkg/ezs3"
-	"github.com/guoyk93/activate-toolchain/pkg/ezscript"
+	"github.com/yankeguo/activate-toolchain"
+	"github.com/yankeguo/activate-toolchain/pkg/ezs3"
+	"github.com/yankeguo/activate-toolchain/pkg/ezscript"
 	"strings"
 )
 

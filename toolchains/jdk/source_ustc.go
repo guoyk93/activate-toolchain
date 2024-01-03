@@ -5,7 +5,7 @@ import (
 	"errors"
 	"fmt"
 	"github.com/PuerkitoBio/goquery"
-	"github.com/guoyk93/activate-toolchain"
+	"github.com/yankeguo/activate-toolchain"
 	"log"
 	"net/url"
 )

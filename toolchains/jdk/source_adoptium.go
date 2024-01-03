@@ -6,7 +6,7 @@ import (
 	"fmt"
 	"github.com/Masterminds/semver/v3"
 	"github.com/go-resty/resty/v2"
-	"github.com/guoyk93/activate-toolchain"
+	"github.com/yankeguo/activate-toolchain"
 	"log"
 	"net/url"
 	"strconv"

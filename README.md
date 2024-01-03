@@ -9,14 +9,14 @@ You can either build binary from source, or just download pre-built binary.
 * Build from source
 
     ```shell
-   git clone https://github.com/guoyk93/activate-toolchain.git
+   git clone https://github.com/yankeguo/activate-toolchain.git
    cd activate-toolchain
    go build -o activate-toolchain ./cmd/activate-toolchain
     ```
 
 * Download pre-built binaries
 
-  View <https://github.com/guoyk93/activate-toolchain/releases>
+  View <https://github.com/yankeguo/activate-toolchain/releases>
 
 ## Usage
 

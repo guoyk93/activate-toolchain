@@ -2,7 +2,7 @@ package jdk
 
 import (
 	"context"
-	"github.com/guoyk93/activate-toolchain"
+	"github.com/yankeguo/activate-toolchain"
 	"sync"
 )
 

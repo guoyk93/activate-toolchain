@@ -3,8 +3,8 @@ package jdk
 import (
 	"context"
 	"fmt"
-	"github.com/guoyk93/activate-toolchain"
-	"github.com/guoyk93/activate-toolchain/pkg/ezscript"
+	"github.com/yankeguo/activate-toolchain"
+	"github.com/yankeguo/activate-toolchain/pkg/ezscript"
 	"log"
 	"path/filepath"
 	"strings"

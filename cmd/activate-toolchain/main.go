@@ -5,17 +5,17 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"github.com/guoyk93/activate-toolchain"
+	"github.com/yankeguo/activate-toolchain"
 	"log"
 	"os"
 	"strings"
 
-	_ "github.com/guoyk93/activate-toolchain/toolchains/jdk"
-	_ "github.com/guoyk93/activate-toolchain/toolchains/kubectl"
-	_ "github.com/guoyk93/activate-toolchain/toolchains/maven"
-	_ "github.com/guoyk93/activate-toolchain/toolchains/node"
-	_ "github.com/guoyk93/activate-toolchain/toolchains/ossutil"
-	_ "github.com/guoyk93/activate-toolchain/toolchains/pnpm"
+	_ "github.com/yankeguo/activate-toolchain/toolchains/jdk"
+	_ "github.com/yankeguo/activate-toolchain/toolchains/kubectl"
+	_ "github.com/yankeguo/activate-toolchain/toolchains/maven"
+	_ "github.com/yankeguo/activate-toolchain/toolchains/node"
+	_ "github.com/yankeguo/activate-toolchain/toolchains/ossutil"
+	_ "github.com/yankeguo/activate-toolchain/toolchains/pnpm"
 )
 
 func main() {
